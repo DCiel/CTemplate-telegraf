@@ -1,0 +1,17 @@
+# production
+/dist
+.env
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+bun.lockb
+
+# misc
+.DS_Store
+*.pem
+
+# sessions
+sessions.json
