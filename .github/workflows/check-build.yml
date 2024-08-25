@@ -1,0 +1,47 @@
+name: Build project
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs: 
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 'latest'
+
+      - name: Install modules
+        run: bun i
+      - name: Build
+        run: bun run build
+        
+  deploy:
+    needs: [build]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            bash -s < ./app/scripts/deploy.sh
+            cd ~/app/telegram/CTemplace-telegraf
+            bun i
+            bun run build
+            pm2 delete telegram
+            pm2 start bun --name telegram -- start
